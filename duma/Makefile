@@ -90,7 +90,12 @@ ifeq ($(OS), Windows_NT)
   endif
 else
   CURPATH=./
-  DUMASO=libduma.so.0.0
+  OS := $(shell uname)
+  ifneq ($(OS), Darwin)
+    DUMASO=libduma.so.0.0
+  else
+    DUMASO=libduma.dylib
+  endif
   DUMASO_LINK1=libduma.so.0
   DUMASO_LINK2=libduma.so
   CFLAGS= -g -O0
@@ -129,7 +134,11 @@ all:	libduma.a $(DUMASO) tstheap dumatest dumatestpp testoperators tstheap_so du
 	$(CURPATH)dumatest
 	$(CURPATH)tstheap 3072
 	$(CURPATH)testoperators
+ifneq ($(OS), Darwin)
 	(export LD_PRELOAD=./$(DUMASO); exec $(CURPATH)tstheap_so 3072)
+else
+	(export DYLD_INSERT_LIBRARIES=./$(DUMASO); exec $(CURPATH)tstheap_so 3072)
+endif
 	@ echo
 	@ echo "DUMA confidence test PASSED."
 
@@ -201,11 +210,14 @@ $(OBJECTS) tstheap.o dumatest.o dumatestpp.o: duma.h
 ifneq ($(OS), Windows_NT)
 
 $(DUMASO): duma_config.h $(SO_OBJECTS)
+ifneq ($(OS), Darwin)
 	$(CXX) -g -shared -Wl,-soname,$(DUMASO) -o $(DUMASO) $(SO_OBJECTS) -lpthread -lc
 	$(CXX) -g -shared -o $(DUMASO) $(SO_OBJECTS) -lpthread -lc
-
+else
+	$(CXX) -g -dynamiclib -o $(DUMASO) $(SO_OBJECTS) -lpthread -lc
 endif
 
+endif
 
 #
 # define rules how to build objects for createconf
