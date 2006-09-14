@@ -38,7 +38,7 @@ to use the '-lduma' argument to the linker, otherwise you'll have to put the
 path-name for libduma.a in the linker's command line.
 You can also use dynamic linking. If you're using a Bourne shell, the statement
 'export LD_PRELOAD=libduma.so.0.0' will cause DUMA to be loaded to run all
-dynamic executables.
+dynamic executables.  (Note: for Mac OS X the equivalent is 'export DYLD_INSERT_LIBRARIES=libduma.dylib")
 
 The command 'duma <command>' runs a single command under DUMA.
 
