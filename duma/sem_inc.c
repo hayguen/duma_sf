@@ -26,6 +26,7 @@
 #include "duma_config.h"
 #include "sem_inc.h"
 #include "print.h"
+#include <stdio.h>
 
 #ifndef DUMA_NO_THREAD_SAFETY
 
@@ -57,7 +58,11 @@
 
   #define DUMA_thread_self()  pthread_self()
 
+#ifdef __APPLE__
+  static sem_t     *DUMA_sem = 0;
+#else
   static sem_t      DUMA_sem = { 0 };
+#endif
   static pthread_t  semThread = (pthread_t) 0;
 
 #else /* WIN32 */
@@ -105,8 +110,20 @@ DUMA_init_sem(void)
   semInInit = 1;
 
 #ifndef WIN32
-  if (sem_init(&DUMA_sem, 0, 1) >= 0)
+#ifdef __APPLE__
+  pid_t mypid = getpid();
+  char sembuf[256];
+  /* generate 'unique' semaphore id from combination of "duma" and PID */
+  snprintf(sembuf, sizeof(sembuf), "duma%ld", (long)mypid);
+  DUMA_sem = sem_open(sembuf, O_CREAT | O_EXCL, 0777, 1); /* os x doesn't have sem_init (yet) */
+  if((sem_t *)SEM_FAILED != DUMA_sem) { /* truly horrible */
     semInited = 1;
+  }
+#else
+  if (sem_init(&DUMA_sem, 0, 1) >= 0) {
+    semInited = 1;
+  }
+#endif
 #else
   pid = GetCurrentProcessId();
   SEM_STRCPY(semLocalName, semObjectName);
@@ -148,7 +165,11 @@ void DUMA_get_sem(void)
   if (semThread != DUMA_thread_self())
   {
 #ifndef WIN32
+#ifdef __APPLE__
+    while (sem_wait(DUMA_sem) < 0);    /* wait for the semaphore. */
+#else
     while (sem_wait(&DUMA_sem) < 0);   /* wait for the semaphore. */
+#endif
 #else
     while (WaitForSingleObject(semHandle, 1000) != WAIT_OBJECT_0) ; /* wait for the semaphore. */
 #endif
@@ -170,7 +191,11 @@ void DUMA_rel_sem(void)
   {
 #ifndef WIN32
     semThread = (pthread_t) 0;        /* zero this before actually free'ing the semaphore. */
+#ifdef __APPLE__
+    if (sem_post(DUMA_sem) < 0)
+#else
     if (sem_post(&DUMA_sem) < 0)
+#endif
 #else
     semThread = 0;                    /* zero this before actually free'ing the semaphore. */
     if (0 == ReleaseSemaphore(semHandle, 1 /* amount to add to current count */, NULL) )
