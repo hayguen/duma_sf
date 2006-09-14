@@ -578,7 +578,11 @@ void duma_init(void)
     #ifdef WIN32
                  "DUMA: If this hangs, change the library initialization order with DUMA_EXPLICIT_INIT.\n");
     #else
+    #ifndef __APPLE__
                  "DUMA: If this hangs, change the library load/init order with DUMA_EXPLICIT_INIT or LD_PRELOAD.\n");
+    #else
+                 "DUMA: If this hangs, change the library load/init order with DUMA_EXPLICIT_INIT or DYLD_INSERT_LIBRARIES.\n");
+    #endif
     #endif
     else 
       DUMA_Print("\nDUMA: Skipping registering with atexit(). Set DUMA_SUPPRESS_ATEXIT to 0 to register.\n");
@@ -605,11 +609,19 @@ void duma_init(void)
    */
   testAlloc = malloc(123);
   if (numAllocs == 0)
+#ifndef __APPLE__
     DUMA_Abort("malloc() is not bound to duma.\nDUMA Aborting: Preload lib with 'LD_PRELOAD=libduma.so <prog>'.\n");
+#else
+    DUMA_Abort("malloc() is not bound to duma.\nDUMA Aborting: Preload lib with 'DYLD_INSERT_LIBRARIES=libduma.dylib <prog>'.\n");
+#endif
 
   free(testAlloc);
   if (numDeallocs == 0)
+#ifndef __APPLE__
     DUMA_Abort("free() is not bound to duma.\nDUMA Aborting: Preload lib with 'LD_PRELOAD=libduma.so <prog>'.\n");
+#else
+    DUMA_Abort("free() is not bound to duma.\nDUMA Aborting: Preload lib with 'DYLD_INSERT_LIBRARIES=libduma.dylib <prog>'.\n");
+#endif
 #endif
 
   /* initialization finished */
