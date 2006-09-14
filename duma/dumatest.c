@@ -148,9 +148,11 @@ gotSegmentationFault(int (*test)(void))
 }
 
 
-static char *  allocation;
-/* c is global so that assignments to it won't be optimized out. */
-char  c;
+/* These variables should be volatile because they might get
+   put into registers, and calls to siglongjmp etc will result in
+   their getting clobbered if we save registers on the stack. */
+volatile char *allocation;
+volatile char c;
 
 static int
 testSizes(void)
@@ -176,7 +178,7 @@ allocateMemory(void)
 static int
 freeMemory(void)
 {
-  free(allocation);
+  free((char *)allocation);
   allocation = 0;
   return 0;
 }
