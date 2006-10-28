@@ -151,8 +151,13 @@ gotSegmentationFault(int (*test)(void))
 /* These variables should be volatile because they might get
    put into registers, and calls to siglongjmp etc will result in
    their getting clobbered if we save registers on the stack. */
-volatile char *allocation;
-volatile char c;
+#ifdef SUNCC
+extern volatile char *allocation = 0;
+extern volatile char c = 0;
+#else
+volatile char *allocation = 0;
+volatile char c = 0;
+#endif
 
 static int
 testSizes(void)
@@ -167,7 +172,7 @@ testSizes(void)
 static int
 allocateMemory(void)
 {
-  allocation = (char *)malloc(1);
+  allocation = (volatile char *)malloc(1);
 
   if ( allocation != 0 )
     return 0;
