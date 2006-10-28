@@ -64,15 +64,14 @@ DUMA_OPTIONS =
 #DUMA_OPTIONS = -DDUMA_NO_CPP_SUPPORT
 #DUMA_OPTIONS = -DDUMA_USE_FRAMENO
 
-PIC= -fPIC
-DUMA_SO_OPTIONS = $(PIC) -DDUMA_SO_LIBRARY
-
 # for FreeBSD 5.4
 # DUMA_OPTIONS += -DPAGE_PROTECTION_VIOLATED_SIGNAL=SIGBUS
 #
 # for FreeBSD 5.4 if DUMA_EXPLICIT_INIT is not set
 # DUMA_OPTIONS += -DDUMA_NO_LEAKDETECTION
 
+CC=gcc
+CXX=g++
 
 ifeq ($(OS), Windows_NT)
   ifeq ($(OSTYPE), msys)
@@ -92,21 +91,42 @@ else
   CURPATH=./
   OS := $(shell uname)
   ifneq ($(OS), Darwin)
-    DUMASO=libduma.so.0.0
+    ifneq ($(OS), SunOS)
+      DUMASO=libduma.so.0.0
+    else
+      CC=/opt/SUNWspro/bin/cc
+      CXX=/opt/SUNWspro/bin/CC
+      DUMASO=libduma.so
+    endif
   else
     DUMASO=libduma.dylib
   endif
   DUMASO_LINK1=libduma.so.0
   DUMASO_LINK2=libduma.so
-  CFLAGS= -g -O0
-  CPPFLAGS= -g -O0
+  CFLAGS= -g
+  CPPFLAGS= -g
+  ifeq ($(CC), gcc) 
+    CFLAGS += -O0
+    CPPFLAGS += -O0
+  endif
   LIBS=-lpthread
+  ifeq ($(OS), SunOS)
+    CFLAGS += -mt
+    CPPFLAGS += -mt
+    LIBS += -lrt
+  endif
 endif
 
+PIC=
+ifeq ($(CC), gcc)
+  PIC= -fPIC
+endif
+DUMA_SO_OPTIONS = $(PIC) -DDUMA_SO_LIBRARY
 
-CC=gcc
-CXX=g++
 AR=ar
+ifeq ($(OS), SunOS)
+  AR=/usr/ccs/bin/ar
+endif
 INSTALL=install
 
 ############################################################
@@ -211,8 +231,19 @@ ifneq ($(OS), Windows_NT)
 
 $(DUMASO): duma_config.h $(SO_OBJECTS)
 ifneq ($(OS), Darwin)
+ifneq ($(OS), SunOS)
 	$(CXX) -g -shared -Wl,-soname,$(DUMASO) -o $(DUMASO) $(SO_OBJECTS) -lpthread -lc
+endif
+ifeq ($(CXX), g++)
 	$(CXX) -g -shared -o $(DUMASO) $(SO_OBJECTS) -lpthread -lc
+else
+ifeq ($(OS), SunOS)
+	$(CXX) -G -o $(DUMASO) $(SO_OBJECTS) -lpthread -lc -lCrun
+else
+# this is a best guess at non-gcc, non-solaris combination -- pls. feel free to correct
+	$(CXX) -G -o $(DUMASO) $(SO_OBJECTS) -lpthread -lc
+endif
+endif
 else
 	$(CXX) -g -dynamiclib -o $(DUMASO) $(SO_OBJECTS) -lpthread -lc
 endif
