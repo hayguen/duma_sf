@@ -1,4 +1,3 @@
-
 Title: README
 
 D.U.M.A. - Detect Unintended Memory Access - A Red-Zone memory allocator:
@@ -475,6 +474,8 @@ COMPILATION NOTES FOR RELEASE/PRODUCTION:
 Set the preprocessor definition
 
 #define DUMA_NO_DUMA
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhayguen%2Fduma.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhayguen%2Fduma?ref=badge_shield)
+
 
 in your Makefiles to disable DUMA usage and don't link with DUMA library.
 With DUMA_NO_DUMA-definition all DUMA macro functions get defined but do
@@ -714,3 +715,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhayguen%2Fduma.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhayguen%2Fduma?ref=badge_large)
