@@ -714,8 +714,3 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-
-
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhayguen%2Fduma.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhayguen%2Fduma?ref=badge_large)
