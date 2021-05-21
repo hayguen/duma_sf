@@ -2,6 +2,18 @@ Title: README
 
 D.U.M.A. - Detect Unintended Memory Access - A Red-Zone memory allocator:
 
+NO LONGER MAINTAINED:
+
+After many years of inactivity,
+i copied and converted the sources from sourceforge to git(hub),
+and did a minor cleanup.
+
+Some time after that work, i got notified of https://github.com/johnsonjh/duma
+, which for sure is the better choice. Please go / look there for updates.
+
+There is no further development here!
+
+
 
 DESCRIPTION:
 
